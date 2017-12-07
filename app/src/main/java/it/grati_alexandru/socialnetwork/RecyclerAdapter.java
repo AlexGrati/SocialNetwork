@@ -30,10 +30,12 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.CardHo
         private CardView cardView;
         public CardHolder(View v, Context context){
             super(v);
-            cardView = (CardView)v.findViewById(R.id.cardViewId);
+            cardView = v.findViewById(R.id.cardViewId);
             textViewAutore = v.findViewById(R.id.textViewAutore);
             textViewTitolo = v.findViewById(R.id.textViewTitolo);
             textViewDataCreazione = v.findViewById(R.id.textViewData);
+            this.context = context;
+            this.context = context;
 
             cardView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -73,6 +75,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.CardHo
     public int getItemCount() {
         return postList.size();
     }
+
     public String formatDateToString(Date date){
         Format format2 = new SimpleDateFormat("dd/MM/yy", Locale.ITALY);
         return format2.format(date);
