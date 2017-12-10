@@ -35,16 +35,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.CardHo
             textViewTitolo = v.findViewById(R.id.textViewTitolo);
             textViewDataCreazione = v.findViewById(R.id.textViewData);
             this.context = context;
-            this.context = context;
 
-            cardView.setOnClickListener(new View.OnClickListener() {
+           /* cardView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
                 }
-            });
-
-
+            });*/
         }
     }
 

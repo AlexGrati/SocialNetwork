@@ -53,25 +53,25 @@ public class PostViewActivity extends AppCompatActivity implements ResponseContr
         comunity = (Comunity) FileOperations.readObject(getApplicationContext(),"COMUNITY");
         currentGroupe = comunity.getGroupeByName(currentGroupName);
 
-        if(currentGroupe.getPostList().size() == 0) {
+        if(currentGroupe.getPostList().size() != 0) {
             postList = currentGroupe.getPostList();
             recyclerAdapter = new RecyclerAdapter(getApplicationContext(),postList);
         }else{
-            progressDialog = new ProgressDialog(getApplicationContext());
+            progressDialog = new ProgressDialog(PostViewActivity.this);
             progressDialog.setTitle("Caricamento Dati....");
             progressDialog.show();
             getAllPostsRestOperation();
         }
-
+        recyclerView.setAdapter(recyclerAdapter);
     }
 
     public void getAllPostsRestOperation(){
-
-        FirebaseRestRequests.get("Communities/Gruppi" + currentGroupName + "/Posts", null, new AsyncHttpResponseHandler() {
+        FirebaseRestRequests.get("Communities/Gruppi/" + currentGroupName + "/Posts", null, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 if(statusCode == 200){
-                    List<Post> tempPostList = JSONParser.getAllPosts(new String(responseBody));
+                    String jsonString = new String(responseBody);
+                    List<Post> tempPostList = JSONParser.getAllPosts(jsonString);
                     recyclerAdapter = new RecyclerAdapter(getApplicationContext(),tempPostList);
                     comunity.updateGroupePostList(currentGroupe, tempPostList);
                     FileOperations.writeObject(getApplicationContext(),"COMUNITY", comunity);
@@ -84,7 +84,7 @@ public class PostViewActivity extends AppCompatActivity implements ResponseContr
                 if(statusCode >= 400 && statusCode < 500){
                     responseController.respondOnRecevedData();
                     Toast.makeText(getApplicationContext(),"Server innacessibile!\nRiprova in una altro momento",
-                            Toast.LENGTH_SHORT);
+                            Toast.LENGTH_SHORT).show();
                 }
             }
         });

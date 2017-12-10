@@ -44,7 +44,7 @@ public class JSONParser {
             Iterator iterator = jsonObjectPost.keys();
             while (iterator.hasNext()){
                 String postKey = (String)iterator.next();
-                JSONObject jsonObjectPostData = new JSONObject(postKey);
+                JSONObject jsonObjectPostData = jsonObjectPost.getJSONObject(postKey);
                 Iterator iteratorPostData = jsonObjectPostData.keys();
                 Post tempPost = new Post();
                 while (iteratorPostData.hasNext()){
