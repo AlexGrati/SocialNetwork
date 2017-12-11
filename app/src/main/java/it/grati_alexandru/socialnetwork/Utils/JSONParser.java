@@ -27,7 +27,8 @@ public class JSONParser {
             JSONObject jsonObject = new JSONObject(json);
             Iterator<String> iterator = jsonObject.keys();
             while (iterator.hasNext()){
-                Gruppo g = new Gruppo(iterator.next(), new ArrayList<Post>());
+                Date date = new Date();
+                Gruppo g = new Gruppo(iterator.next(), new ArrayList<Post>(), date);
                 listaGruppi.add(g);
             }
         }catch (JSONException e){
@@ -57,8 +58,11 @@ public class JSONParser {
                         case "Autore":
                             tempPost.setAutore(postVal);
                             break;
+                        case "Contenuto":
+                            tempPost.setContenuto(postVal);
+                            break;
                         case "Data_Creazione":
-                            tempPost.setDataCreazeione(JSONParser.formatStringToDate(postVal));
+                            tempPost.setDataCreazeione(DateConversion.formatStringToDate(postVal));
                             break;
                     }
                 }
@@ -70,8 +74,5 @@ public class JSONParser {
         return postList;
     }
 
-    public static Date formatStringToDate(String dateString){
-        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yy", Locale.ITALY);
-        return  format.parse(dateString, new ParsePosition(0));
-    }
+
 }

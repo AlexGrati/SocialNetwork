@@ -11,17 +11,20 @@ public class Post implements Serializable{
     private String titolo;
     private String autore;
     private Date dataCreazeione;
+    private String contenuto;
 
     public Post(){
         this.titolo = null;
         this.autore = null;
         this.dataCreazeione = new Date();
+        this.contenuto = null;
     }
 
-    public Post(String titolo, String autore, Date dataCreazeione) {
+    public Post(String titolo, String autore, Date dataCreazeione, String contenuto) {
         this.titolo = titolo;
         this.autore = autore;
         this.dataCreazeione = dataCreazeione;
+        this.contenuto = contenuto;
     }
 
     public String getTitolo() {
@@ -46,5 +49,13 @@ public class Post implements Serializable{
 
     public void setDataCreazeione(Date dataCreazeione) {
         this.dataCreazeione = dataCreazeione;
+    }
+
+    public String getContenuto() {
+        return contenuto;
+    }
+
+    public void setContenuto(String contenuto) {
+        this.contenuto = contenuto;
     }
 }

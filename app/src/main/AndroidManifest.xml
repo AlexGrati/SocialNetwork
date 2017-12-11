@@ -18,7 +18,8 @@
         </activity>
         <activity android:name=".ComunityActivity" />
         <activity android:name=".PostActivity" />
-        <activity android:name=".PostViewActivity"></activity>
+        <activity android:name=".PostViewActivity" />
+        <activity android:name=".AddPostActivity"/>
     </application>
 
 </manifest>

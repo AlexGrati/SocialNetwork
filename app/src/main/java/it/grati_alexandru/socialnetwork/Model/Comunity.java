@@ -2,6 +2,7 @@ package it.grati_alexandru.socialnetwork.Model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -27,6 +28,20 @@ public class Comunity implements Serializable {
         this.listaGruppi = listaGruppi;
     }
 
+    public void updateGroupeLastModDate(Gruppo gruppo, Date date){
+        for(Gruppo g: getListaGruppi()){
+            if(g.getNome().equals(gruppo.getNome())){
+                g.setLastModDate(date);
+                break;
+            }
+        }
+    }
+
+    public void updateGroupe(Gruppo gruppo){
+        Gruppo g = getGroupeByName(gruppo.getNome());
+        g = gruppo;
+    }
+
     public Gruppo getGroupeByName(String groupeName){
         for(Gruppo g: getListaGruppi()){
             if(g.getNome().equals(groupeName))
@@ -43,4 +58,5 @@ public class Comunity implements Serializable {
             }
         }
     }
+
 }

@@ -4,28 +4,32 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 import it.grati_alexandru.socialnetwork.Model.Comunity;
 import it.grati_alexandru.socialnetwork.Model.Gruppo;
 import it.grati_alexandru.socialnetwork.Model.Post;
+import it.grati_alexandru.socialnetwork.Utils.DateConversion;
 import it.grati_alexandru.socialnetwork.Utils.FileOperations;
 import it.grati_alexandru.socialnetwork.Utils.FirebaseRestRequests;
 import it.grati_alexandru.socialnetwork.Utils.JSONParser;
 import it.grati_alexandru.socialnetwork.Utils.ResponseController;
 
-public class PostViewActivity extends AppCompatActivity implements ResponseController {
+public class PostViewActivity extends AppCompatActivity implements ResponseController,SwipeRefreshLayout.OnRefreshListener {
     private Comunity comunity;
     private RecyclerView recyclerView;
     private RecyclerAdapter recyclerAdapter;
@@ -37,6 +41,7 @@ public class PostViewActivity extends AppCompatActivity implements ResponseContr
     private Gruppo currentGroupe;
     private ResponseController responseController;
     private ProgressDialog progressDialog;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,12 +49,13 @@ public class PostViewActivity extends AppCompatActivity implements ResponseContr
         setContentView(R.layout.activity_post_view);
 
         responseController = this;
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         recyclerView = findViewById(R.id.reclerViewId);
         linearLayoutManager = new LinearLayoutManager(PostViewActivity.this);
         recyclerView.setLayoutManager(linearLayoutManager);
 
-        currentGroupName = getIntent().getStringExtra("GROUPE_NAME");
+        currentGroupName = sharedPreferences.getString("GROUPE_NAME","");
         comunity = (Comunity) FileOperations.readObject(getApplicationContext(),"COMUNITY");
         currentGroupe = comunity.getGroupeByName(currentGroupName);
 
@@ -62,7 +68,47 @@ public class PostViewActivity extends AppCompatActivity implements ResponseContr
             progressDialog.show();
             getAllPostsRestOperation();
         }
-        recyclerView.setAdapter(recyclerAdapter);
+
+        Date dat = currentGroupe.getLastModDate();
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        swipeRefreshLayout.setColorScheme(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+    }
+
+    @Override
+    public void onRefresh() {
+        FirebaseRestRequests.get("Communities/Gruppi/" + currentGroupName + "/LastModDate", null, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                if(statusCode == 200){
+                    String response = new String(responseBody);
+                    Date lastModDate = DateConversion.formatStringToDate(response);
+                    Date localGroupeModDate = currentGroupe.getLastModDate();
+                    if(lastModDate.after(localGroupeModDate)){
+                        getAllPostsRestOperation();
+                        currentGroupe.setLastModDate(new Date());
+                        Toast.makeText(getApplicationContext(),"Lista aggiornata.",
+                                Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(getApplicationContext(),"Non ci sono elementi nuovi",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                    responseController.respondOnRecevedData();
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                if(statusCode >= 400 && statusCode < 500){
+                    Toast.makeText(getApplicationContext(),"Server innacessibile!\nRiprova in una altro momento",
+                            Toast.LENGTH_SHORT).show();
+                }
+                responseController.respondOnRecevedData();
+            }
+        });
     }
 
     public void getAllPostsRestOperation(){
@@ -73,6 +119,8 @@ public class PostViewActivity extends AppCompatActivity implements ResponseContr
                     String jsonString = new String(responseBody);
                     List<Post> tempPostList = JSONParser.getAllPosts(jsonString);
                     recyclerAdapter = new RecyclerAdapter(getApplicationContext(),tempPostList);
+                    currentGroupe.setPostList(tempPostList);
+                    recyclerView.setAdapter(recyclerAdapter);
                     comunity.updateGroupePostList(currentGroupe, tempPostList);
                     FileOperations.writeObject(getApplicationContext(),"COMUNITY", comunity);
                     responseController.respondOnRecevedData();
@@ -91,8 +139,28 @@ public class PostViewActivity extends AppCompatActivity implements ResponseContr
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        comunity = (Comunity) FileOperations.readObject(getApplicationContext(), "COMUNITY");
+        currentGroupe = comunity.getGroupeByName(currentGroupName);
+        recyclerAdapter = new RecyclerAdapter(getApplicationContext(), currentGroupe.getPostList());
+        recyclerView.setAdapter(recyclerAdapter);
+    }
+
+    public void onAddFabClicked(View v){
+        intent = new Intent(getApplicationContext(),AddPostActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
     public void respondOnRecevedData() {
-        progressDialog.dismiss();
-        progressDialog.cancel();
+        if(progressDialog != null){
+            progressDialog.dismiss();
+            progressDialog.cancel();
+        }
+
+        if(swipeRefreshLayout != null){
+            swipeRefreshLayout.setRefreshing(false);
+        }
     }
 }
