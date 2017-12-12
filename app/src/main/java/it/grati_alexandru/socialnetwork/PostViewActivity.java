@@ -13,6 +13,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.firebase.database.FirebaseDatabase;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
 import java.util.ArrayList;
@@ -37,39 +38,38 @@ public class PostViewActivity extends AppCompatActivity implements ResponseContr
     private SharedPreferences sharedPreferences;
     private Intent intent;
     private String currentGroupName;
-    private List<Post> postList;
     private Gruppo currentGroupe;
     private ResponseController responseController;
     private ProgressDialog progressDialog;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private Date lastModDate;
+    private Date localGroupeModDate;
+    private Boolean upToDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post_view);
 
-        responseController = this;
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        currentGroupName = sharedPreferences.getString("GROUPE_NAME","");
+        setTitle(currentGroupName);
+
+        responseController = this;
 
         recyclerView = findViewById(R.id.reclerViewId);
         linearLayoutManager = new LinearLayoutManager(PostViewActivity.this);
         recyclerView.setLayoutManager(linearLayoutManager);
 
-        currentGroupName = sharedPreferences.getString("GROUPE_NAME","");
         comunity = (Comunity) FileOperations.readObject(getApplicationContext(),"COMUNITY");
         currentGroupe = comunity.getGroupeByName(currentGroupName);
 
         if(currentGroupe.getPostList().size() != 0) {
-            postList = currentGroupe.getPostList();
-            recyclerAdapter = new RecyclerAdapter(getApplicationContext(),postList);
+            checkGroupeLastModDate();
         }else{
-            progressDialog = new ProgressDialog(PostViewActivity.this);
-            progressDialog.setTitle("Caricamento Dati....");
-            progressDialog.show();
             getAllPostsRestOperation();
         }
 
-        Date dat = currentGroupe.getLastModDate();
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setColorScheme(android.R.color.holo_blue_bright,
@@ -80,22 +80,18 @@ public class PostViewActivity extends AppCompatActivity implements ResponseContr
 
     @Override
     public void onRefresh() {
-        FirebaseRestRequests.get("Communities/Gruppi/" + currentGroupName + "/LastModDate", null, new AsyncHttpResponseHandler() {
+        checkGroupeLastModDate();
+    }
+
+    public void checkGroupeLastModDate(){
+        upToDate = false;
+        FirebaseRestRequests.get("Communities/Gruppi/" + currentGroupName + "/LastModDate", null, new AsyncHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 if(statusCode == 200){
                     String response = new String(responseBody);
-                    Date lastModDate = DateConversion.formatStringToDate(response);
-                    Date localGroupeModDate = currentGroupe.getLastModDate();
-                    if(lastModDate.after(localGroupeModDate)){
-                        getAllPostsRestOperation();
-                        currentGroupe.setLastModDate(new Date());
-                        Toast.makeText(getApplicationContext(),"Lista aggiornata.",
-                                Toast.LENGTH_SHORT).show();
-                    }else{
-                        Toast.makeText(getApplicationContext(),"Non ci sono elementi nuovi",
-                                Toast.LENGTH_SHORT).show();
-                    }
+                    lastModDate = DateConversion.formatStringToDate(response);
+                    localGroupeModDate = currentGroupe.getLastModDate();
                     responseController.respondOnRecevedData();
                 }
             }
@@ -105,13 +101,17 @@ public class PostViewActivity extends AppCompatActivity implements ResponseContr
                 if(statusCode >= 400 && statusCode < 500){
                     Toast.makeText(getApplicationContext(),"Server innacessibile!\nRiprova in una altro momento",
                             Toast.LENGTH_SHORT).show();
+                    responseController.respondOnRecevedData();
                 }
-                responseController.respondOnRecevedData();
             }
         });
     }
 
     public void getAllPostsRestOperation(){
+        progressDialog = new ProgressDialog(PostViewActivity.this);
+        progressDialog.setTitle("Caricamento Dati....");
+        progressDialog.show();
+
         FirebaseRestRequests.get("Communities/Gruppi/" + currentGroupName + "/Posts", null, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
@@ -123,6 +123,7 @@ public class PostViewActivity extends AppCompatActivity implements ResponseContr
                     recyclerView.setAdapter(recyclerAdapter);
                     comunity.updateGroupePostList(currentGroupe, tempPostList);
                     FileOperations.writeObject(getApplicationContext(),"COMUNITY", comunity);
+                    upToDate = true;
                     responseController.respondOnRecevedData();
                 }
             }
@@ -154,6 +155,18 @@ public class PostViewActivity extends AppCompatActivity implements ResponseContr
 
     @Override
     public void respondOnRecevedData() {
+        if(lastModDate != null && !upToDate){
+            if (lastModDate.after(localGroupeModDate)) {
+                getAllPostsRestOperation();
+                currentGroupe.setLastModDate(new Date());
+                Toast.makeText(getApplicationContext(), "Lista aggiornata.",
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getApplicationContext(), "Non ci sono elementi nuovi",
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+
         if(progressDialog != null){
             progressDialog.dismiss();
             progressDialog.cancel();

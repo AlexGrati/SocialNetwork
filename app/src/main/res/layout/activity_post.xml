@@ -6,30 +6,51 @@
     android:layout_height="match_parent"
     tools:context="it.grati_alexandru.socialnetwork.PostActivity">
 
-    <RelativeLayout
-        android:id="@+id/relativeLayout"
+    <TextView
+        android:id="@+id/textViewPostTitle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="50dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textSize="30sp" />
 
-        <TextView
-            android:id="@+id/textViewPostTitle"
+    <RelativeLayout
+        android:id="@+id/relativeLayoutRel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textViewPostTitle"
+        android:layout_above="@+id/relLayout">
+
+        <ScrollView
+            android:id="@+id/scrollView3"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:text="TextView"
-            android:textAlignment="center"
-            android:textSize="30sp" />
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true">
 
-        <TextView
-            android:id="@+id/textViewAutorePost"
-            android:layout_width="180dp"
-            android:layout_height="30dp"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/textViewPostTitle"
-            android:text="TextView"
-            android:textAlignment="textEnd"
-            android:textSize="16sp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textViewContenutoPost"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="TextView"
+                    android:textSize="18sp" />
+            </LinearLayout>
+        </ScrollView>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relLayout"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true">
 
         <TextView
             android:id="@+id/textViewDataCreazionePost"
@@ -41,25 +62,15 @@
             android:text="TextView"
             android:textSize="16sp" />
 
+        <TextView
+            android:id="@+id/textViewAutorePost"
+            android:layout_width="180dp"
+            android:layout_height="30dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:text="TextView"
+            android:textAlignment="textEnd"
+            android:textSize="16sp" />
     </RelativeLayout>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="420dp"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/relativeLayout">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/textViewContenutoPost"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="TextView" />
-        </LinearLayout>
-    </ScrollView>
 
 </RelativeLayout>

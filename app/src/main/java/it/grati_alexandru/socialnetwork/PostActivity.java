@@ -1,11 +1,11 @@
 package it.grati_alexandru.socialnetwork;
 
-import android.content.Context;
-import android.content.Intent;
+
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import it.grati_alexandru.socialnetwork.Model.Comunity;
@@ -19,6 +19,7 @@ public class PostActivity extends AppCompatActivity {
     private TextView textPostAutore;
     private TextView textPostDataCreazione;
     private TextView textPostContenuto;
+    private ScrollView scrollView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +30,7 @@ public class PostActivity extends AppCompatActivity {
         textPostAutore = findViewById(R.id.textViewAutorePost);
         textPostDataCreazione = findViewById(R.id.textViewDataCreazionePost);
         textPostContenuto = findViewById(R.id.textViewContenutoPost);
+        scrollView = findViewById(R.id.scrollView3);
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String groupeName = sharedPreferences.getString("GROUPE_NAME","");
@@ -41,5 +43,6 @@ public class PostActivity extends AppCompatActivity {
         textPostAutore.setText("Publicato da " +post.getAutore());
         textPostDataCreazione.setText(", " + DateConversion.formatDateToString(post.getDataCreazeione()));
         textPostContenuto.setText(post.getContenuto());
+
     }
 }

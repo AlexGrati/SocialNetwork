@@ -22,7 +22,6 @@ import it.grati_alexandru.socialnetwork.Utils.DateConversion;
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.CardHolder> {
 
     public static class CardHolder extends RecyclerView.ViewHolder{
-        private Context context;
         private TextView textViewAutore;
         private TextView textViewTitolo;
         private TextView textViewDataCreazione;
@@ -33,7 +32,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.CardHo
             textViewAutore = v.findViewById(R.id.textViewAutore);
             textViewTitolo = v.findViewById(R.id.textViewTitolo);
             textViewDataCreazione = v.findViewById(R.id.textViewData);
-            this.context = context;
 
             cardView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -68,7 +66,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.CardHo
         p = postList.get(position);
         holder.textViewTitolo.setText(p.getTitolo());
         holder.textViewAutore.setText(p.getAutore());
-        Date date = p.getDataCreazeione();
         String s = DateConversion.formatDateToString(p.getDataCreazeione());
         holder.textViewDataCreazione.setText(s);
     }

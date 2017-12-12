@@ -9,7 +9,7 @@ import com.loopj.android.http.RequestParams;
  */
 
 public class FirebaseRestRequests {
-    private static final String BASE_URL = "https://socialnetwork-490d3.firebaseio.com/";
+    public static final String BASE_URL = "https://socialnetwork-490d3.firebaseio.com/";
     private static final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
 
     private FirebaseRestRequests(){}

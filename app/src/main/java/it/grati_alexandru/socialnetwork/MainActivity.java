@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
                     if(statusCode == 200){
                         String response = new String(responseBody);
                         if(!response.equals("null")){
+                            response = checkPassword(response);
                             if(insertedPassword.equals(response)){
                                 SharedPreferences.Editor edit = sharedPreferences.edit();
                                 edit.putString("USER", insertedUser);
@@ -97,6 +98,14 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
     public void respondOnRecevedData(){
         progressDialog.dismiss();
         progressDialog.cancel();
+    }
+
+
+    public String checkPassword(String password){
+        if(password.contains("\"")){
+            return password.substring(1,password.length()-1);
+        }
+        return password;
     }
 
     public boolean isDataInserted(){
